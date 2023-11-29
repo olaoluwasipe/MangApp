@@ -25,15 +25,19 @@ const Home = ({navigation}) => {
   const [recomm, setRecomm] = useState([])
   const [seop, setTop] = useState([])
   const [genres, setGenres] = useState([])
+  const [featuredManga, setFeaturedManga] = useState(null)
+  const [topNums, setTopNums] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const manga = async () => {
     try {
       const genres = await axios.get('https://api.jikan.moe/v4/genres/manga');
-      const response = await axios.get('https://api.jikan.moe/v4/manga/21/full');
+      const response = await axios.get('https://api.jikan.moe/v4/manga/2/full');
       const recommendations = await axios.get('https://api.jikan.moe/v4/recommendations/manga');
       const top = await axios.get('https://api.jikan.moe/v4/top/manga');
       setGenres(genres.data)
       setTop(top.data)
+      const filt = top?.data?.data?.map((item) => item.mal_id)
+      setTopNums(filt)
       setRecomm(recommendations.data)
       setManga(response.data);
       setIsLoading(false)
@@ -41,10 +45,16 @@ const Home = ({navigation}) => {
       console.error(error);
     }
   };
+
   useEffect(() => {
     const getManga = async () => {
       noanga = await manga();
-    }
+    }  
+  
+    setInterval(() => {
+      const ran = Math.floor(Math.random() * topNums?.length)
+      setFeaturedManga(ran)
+    }, 5000);
 
     getManga()
   }, [])
@@ -60,14 +70,14 @@ const Home = ({navigation}) => {
             ))}
           </ScrollView>
         </View>
-        <ImageBackground imageStyle={{width: '150%', alignSelf: 'center', opacity: 0.4, marginHorizontal: -30}} source={{uri: fManga?.data?.images?.jpg.image_url}} style={styles.hero}>
+        <ImageBackground imageStyle={{width: '150%', alignSelf: 'center', opacity: 0.4, marginHorizontal: -30}} source={{uri: topNums.length > 3 ? seop?.data[featuredManga]?.images?.jpg?.image_url : 'https://placehold.co/600x400'}} style={styles.hero}>
           <View style={{backgroundColor: '#F5F5F5', borderRadius: 20, display:'flex', justifyContent: 'center'}}>
-            <Image resizeMode='cover' style={{width: 300, height: 350, borderWidth: 2, borderColor: '#F5F5F5', borderRadius: 20}} source={{uri: fManga?.data?.images?.jpg.image_url}} />
+          <Image resizeMode='cover' style={{width: 300, height: 350, borderWidth: 2, borderColor: '#F5F5F5', borderRadius: 20}} source={{uri: topNums.length > 3 ? seop?.data[featuredManga]?.images?.jpg?.image_url : 'https://placehold.co/300x350'}} />
             <View style={{padding: 20, display: 'flex', justifyContent: 'space-between', flexDirection: 'row'}}>
-              <Text style={{textTransform: 'capitalize', fontWeight: '600', fontSize: 20}}>{fManga.data?.title}</Text>
+              <Text style={{textTransform: 'capitalize', fontWeight: '600', fontSize: 20}}>{topNums.length > 3 ? seop?.data[featuredManga]?.title : ''}</Text>
               <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                 <Ionicons name='star' size={20} color='#FFD700'/>
-                <Text>{fManga?.data?.score}</Text>
+                <Text>{topNums.length > 3 ? seop?.data[featuredManga]?.score : 0}</Text>
               </View>
             </View>
             <View style={{display: 'flex', flexDirection: 'row'}}>

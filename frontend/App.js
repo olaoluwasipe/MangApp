@@ -18,6 +18,7 @@ import Navigator from './Navigator';
 import Library from './screens/Library';
 import MangaView from './screens/MangaView';
 import TopMangaView from './screens/TopMangaView';
+import ViewManga from './screens/ViewManga';
 
 // COMPONENTS IMPORT
 
@@ -83,6 +84,7 @@ const App = () => {
         <Stack.Screen name='Search' component={Search} options={{title: 'Search'}} />
         <Stack.Screen name='MangaView' component={MangaView} options={{title: 'Manga View'}} />
         <Stack.Screen name='TopMangaView' component={TopMangaView} options={{title: 'Top Manga View'}} />
+        <Stack.Screen name='ViewManga' component={ViewManga} options={{title: 'View Manga'}} />
         {/* <Stack.Screen name='Welcome' component={Welcome} /> */}
       </Stack.Navigator>
     </NavigationContainer>

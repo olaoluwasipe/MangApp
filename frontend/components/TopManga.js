@@ -27,6 +27,7 @@ export default TopManga
 const styles = StyleSheet.create({
     manga: {
         width: 150,
+        flex: 1,
         padding: 5,
         marginRight: 10,
         backgroundColor: '#292c35',

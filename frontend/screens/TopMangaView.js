@@ -1,10 +1,40 @@
-import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, ImageBackground, Image } from 'react-native'
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, ImageBackground, Image, ActivityIndicator, Dimensions } from 'react-native'
 import React, {useState, useEffect} from 'react'
 import { Ionicons } from '@expo/vector-icons'
+import axios from 'axios'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import Chapter from '../components/Chapter'
+import Synopsis from '../components/Synopsis'
 
+const {width, height} = Dimensions.get('screen');
 const TopMangaView = ({navigation, route}) => {
   const item = route.params.item;
-  console.log(item)
+  const [manga, setManga] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const title = item.title;
+  const url = title.split(" ").splice(0, 3).join("%20")
+
+  const getMangaInfo = async () => {
+    try {
+      const response = await axios.get(`http://192.168.100.168:3000/manga_list?keyw=${url}`);
+      const id = response.data[0].data[0].id
+      const catchman = await axios.get(`http://192.168.100.168:3000/manga_info?id=${id}`, {headers: {
+        'host-name' : 'readmanganato.com'
+      }})
+      setManga(catchman.data[0])
+      setIsLoading(false)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    const man = async () =>  {
+      const mann = await getMangaInfo();
+    }
+    man();
+  }, [])
+
   return (
     <SafeAreaView>
       <ImageBackground backgroundColor='#39ff14' opacity={0.5} source={{uri: item.images.jpg.image_url}} style={styles.top}>
@@ -12,7 +42,7 @@ const TopMangaView = ({navigation, route}) => {
           <Ionicons name='arrow-back' size={30} color='#16171F' onPress={() => navigation.goBack()} />
         </TouchableOpacity>
         <View style={{backgroundColor: '#F5F5F5', borderRadius: 20, display:'flex', justifyContent: 'center', marginTop: 200, marginLeft: 10}}>
-          <Image resizeMode='cover' style={{width: 150, height: 200, borderWidth: 2, borderColor: '#F5F5F5', borderRadius: 20}} source={{uri: item.images.jpg.image_url}} />
+          <Image resizeMode='cover' style={{width: 150, height: 200, borderWidth: 2, borderColor: '#F5F5F5', borderRadius: 20, zIndex: 30, position: 'relative'}} source={{uri: item.images.jpg.image_url}} />
         </View>
       </ImageBackground>
       <ScrollView style={styles.container}>
@@ -25,10 +55,34 @@ const TopMangaView = ({navigation, route}) => {
                   <Text style={styles.bodyText}>{item?.score}</Text>
               </View>
               {/* <Text style={styles.bodyText}>{manga?.data?.chapters} Chapters</Text> */}
-            <Text style={styles.bodyText}>Genres: {item?.genres?.map((item) => item.name+", ")}</Text>
+            <Text style={styles.genreText}>Genres: {item?.genres?.map((item) => item.name+", ")}</Text>
           </View>
         </View>
+        <Synopsis text={item?.synopsis} lines={5}/>
+        <Text style={{
+            color: 'white',
+            fontSize: 18,
+            fontWeight: '800',
+            marginBottom: 10,
+            marginTop: 30,
+        }}>Chapters:</Text>
+        <ScrollView style={styles.chapters}>
+          {isLoading ? (
+            <ActivityIndicator
+              color='#39FF14'
+              style={{height: 200}}
+              size={50}
+            />
+          ) : (
+            manga?.chapters?.map((item, index) => (
+            <Chapter key={index} navigation={navigation} item={item} />
+          )))}
+          
+        </ScrollView>
       </ScrollView>
+      <TouchableOpacity style={{position: 'absolute', top: Math.round(height - 130), backgroundColor: '#39FF14', padding: 20, flex: 1, right: 20, borderRadius: 30}}>
+        <Text>Start Reading</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   )
 }
@@ -48,6 +102,10 @@ const styles = StyleSheet.create({
   bodyText: {
     color: 'white'
   },
+  genreText: {
+    color: 'white',
+    marginBottom: 20
+  },
   sectionText: {
     fontSize: 20,
     fontWeight: '700',
@@ -61,7 +119,7 @@ const styles = StyleSheet.create({
     alignContent: 'center',
     gap: 10,
     padding: 10,
-    width: '100%',
+    width: '120%',
     height: 200
   },
   tags: {
@@ -75,8 +133,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  recommendation: {
-    marginTop: 5, 
-    // marginLeft: Math.round(width * 0.04),
+  chapters: {
+    backgroundColor: '#292c35',
+    borderRadius: 20, 
+    overflow: 'hidden',
+    display: 'flex',
+    height: 300,
+    gap: 15,
+    paddingVertical: 15,
+    paddingHorizontal: 5
   },
 })

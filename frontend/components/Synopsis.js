@@ -13,6 +13,7 @@ const Synopsis = ({text, lines}) => {
 
     return (
         <TouchableOpacity onPress={() => change()}>
+        <Text style={styles.titleText}>Synopsis: </Text>
             <Text numberOfLines={numberOfLines} style={styles.bodyText}>
                 {text}
             </Text>
@@ -25,5 +26,11 @@ export default Synopsis
 const styles = StyleSheet.create({
     bodyText: {
         color: 'white'
+    },
+    titleText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: '800',
+        marginVertical: 10
     }
 })

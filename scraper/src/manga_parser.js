@@ -209,7 +209,7 @@ export const scrapeChapter = async({ list = [], chapterUrl }) => {
         $('body > div.body-site > div.container-chapter-reader > img').each((i, el) => {
             list.push({
                 img: $(el).attr('src'),
-                pageTitle: $(el).attr('title').replace(' - MangaNato.com', '').trim()
+                pageTitle: $(el).attr('title').replace(' - MangaNato.com', '').trim(),
             })
         })
 
@@ -218,7 +218,7 @@ export const scrapeChapter = async({ list = [], chapterUrl }) => {
     } catch (err) {
         console.log(err)
     }
-}
+}   
 
 // let list = []
 // scrapeChapter(list, "https://readmanganato.com/manga-mo989871/chapter-20").then((res) => console.log(res))

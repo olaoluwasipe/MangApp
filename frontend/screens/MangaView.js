@@ -1,16 +1,31 @@
-import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, ImageBackground, Image } from 'react-native'
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, ImageBackground, Image, ActivityIndicator, Dimensions } from 'react-native'
 import React, {useState, useEffect} from 'react'
 import { Ionicons } from '@expo/vector-icons'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import axios from 'axios'
 import Synopsis from '../components/Synopsis'
+import Chapter from '../components/Chapter'
 
+const {width, height} = Dimensions.get('screen');
 const MangaView = ({navigation, route}) => {
   const item = route.params.item;
   const finItem = item.entry[0]
   const [manga, setManga] = useState([])
+  const [chapters, setChapters] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const title = finItem.title;
+  const url = title.split(" ").splice(0, 3).join("%20")
   const getManga = async () => {
       const idd = item.mal_id.split('-');
       const response = await axios.get(`https://api.jikan.moe/v4/manga/${idd[0]}/full`)
+      
+      const chapters = await axios.get(`http://192.168.100.168:3000/manga_list?keyw=${url}`);
+      const id = chapters.data[0].data[0].id
+      const catchman = await axios.get(`http://192.168.100.168:3000/manga_info?id=${id}`, {headers: {
+        'host-name' : 'readmanganato.com'
+      }})
+      setChapters(catchman.data[0])
+      setIsLoading(false)
       setManga(response.data);
   }
 
@@ -44,8 +59,30 @@ const MangaView = ({navigation, route}) => {
           </View>
         </View>
         <Synopsis text={manga?.data?.synopsis} lines={5}/>
+        <Text style={{
+            color: 'white',
+            fontSize: 18,
+            fontWeight: '800',
+            marginBottom: 10,
+            marginTop: 30,
+        }}>Chapters:</Text>
+        <ScrollView style={styles.chapters}>
+          {isLoading ? (
+            <ActivityIndicator
+              color='#39FF14'
+              style={{height: 200}}
+              size={50}
+            />
+          ) : (
+            chapters?.chapters?.map((item, index) => (
+            <Chapter key={index} item={item} />
+          )))}
+          
+        </ScrollView>
       </ScrollView>
-      <Text>View</Text>
+      <TouchableOpacity style={{position: 'absolute', top: Math.round(height - 130), backgroundColor: '#39FF14', padding: 20, flex: 1, right: 20, borderRadius: 30}}>
+        <Text>Start Reading</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   )
 }
@@ -92,8 +129,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  recommendation: {
-    marginTop: 5, 
-    // marginLeft: Math.round(width * 0.04),
+  chapters: {
+    backgroundColor: '#292c35',
+    borderRadius: 20, 
+    overflow: 'hidden',
+    display: 'flex',
+    height: 300,
+    gap: 15,
+    paddingVertical: 15,
+    paddingHorizontal: 5
   },
 })

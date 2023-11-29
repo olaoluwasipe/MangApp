@@ -13,6 +13,7 @@ const port = process.env.PORT || 3000;
 
 const corsOptions = {
     origin: "*",
+    methods: ['GET', 'POST'],
     credentails: true,
     optionSuccessStatus: 200,
     port: port,
